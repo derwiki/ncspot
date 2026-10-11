@@ -476,7 +476,9 @@ impl WebApi {
         artist_id: &str,
         album_type: Option<AlbumType>,
     ) -> ApiResult<Album> {
-        const MAX_SIZE: u32 = 50;
+        // Spotify caps `limit` at 10 for this endpoint for apps without extended quota;
+        // larger values are rejected with HTTP 400 "Invalid limit".
+        const MAX_SIZE: u32 = 10;
         let spotify = self.clone();
         let artist_id = artist_id.to_string();
         let fetch_page = move |offset: u32| {

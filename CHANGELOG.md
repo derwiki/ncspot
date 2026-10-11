@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scopes in the login flow, since Spotify rejects the whole authorization
   request with `invalid_scope` when it does not recognize a scope.
 
+### Fixed
+
+- Search returned no results with a personal client ID: the Web API caps `limit`
+  at 10 for apps without extended quota, but ncspot requested 50, which Spotify
+  rejects with HTTP 400 `Invalid limit`. The same cap broke the artist album list
+  (`GET /v1/artists/{id}/albums`).
+
 ## [1.5.0]
 
 ### Added
