@@ -97,7 +97,7 @@ impl Application {
         let credentials = authentication::get_credentials(&configuration)?;
         let theme = configuration.build_theme();
 
-        if let Err(e) = authentication::get_rspotify_token() {
+        if let Err(e) = authentication::get_rspotify_token(&configuration) {
             error!("Failed to get rspotify token: {e}");
         }
 

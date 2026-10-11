@@ -16,6 +16,7 @@ use rspotify::{AuthCodeSpotify, ClientError, ClientResult, Config, prelude::*};
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
+use crate::config;
 use crate::model::album::Album;
 use crate::model::artist::Artist;
 use crate::model::category::Category;
@@ -37,16 +38,22 @@ pub struct WebApi {
     worker_channel: Arc<RwLock<Option<mpsc::UnboundedSender<WorkerCommand>>>>,
     /// Time at which the token expires.
     token_expiration: Arc<RwLock<DateTime<Utc>>>,
+    /// The application configuration, used to resolve the Web API client ID.
+    cfg: Arc<config::Config>,
 }
 
-impl Default for WebApi {
-    fn default() -> Self {
+impl WebApi {
+    pub fn new(cfg: Arc<config::Config>) -> Self {
+        // The credentials below are not used at runtime: ncspot injects the tokens itself (see
+        // `token_refreshing: false`). `update_token` resolves the client ID from the
+        // configuration on every fetch, so a config reload is picked up without a restart.
+        let client_id = crate::authentication::web_api_client_id(&cfg.values()).to_string();
         let config = Config {
             token_refreshing: false,
             ..Default::default()
         };
         let api = AuthCodeSpotify::with_config(
-            rspotify::Credentials::new(crate::authentication::NCSPOT_CLIENT_ID, ""),
+            rspotify::Credentials::new(&client_id, ""),
             rspotify::OAuth::default(),
             config,
         );
@@ -55,13 +62,8 @@ impl Default for WebApi {
             user: None,
             worker_channel: Arc::new(RwLock::new(None)),
             token_expiration: Arc::new(RwLock::new(Utc::now())),
+            cfg,
         }
-    }
-}
-
-impl WebApi {
-    pub fn new() -> Self {
-        Self::default()
     }
 
     /// Set the username for use with the API.
@@ -95,8 +97,9 @@ impl WebApi {
 
         let api_token = self.api.token.clone();
         let api_token_expiration = self.token_expiration.clone();
+        let cfg = self.cfg.clone();
         Some(ASYNC_RUNTIME.get().unwrap().spawn_blocking(move || {
-            match crate::authentication::get_rspotify_token() {
+            match crate::authentication::get_rspotify_token(&cfg) {
                 Ok(token) => {
                     let expires_at = token
                         .expires_at

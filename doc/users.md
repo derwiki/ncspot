@@ -284,6 +284,7 @@ Possible configuration values are:
 | `[theme]`                       | Custom theme                                                   | See [custom theme](#theming)                                                          |                     |
 | `[keybindings]`                 | Custom keybindings                                             | See [custom keybindings](#custom-keybindings)                                         |                     |
 | `ap_port`                       | Set ap-port for librespot (for restrictive firewalls)          | `80`, `443`, `4070`                                                                   |                     |
+| `client_id`                     | Personal Web API app client ID (avoids shared-ID rate limits)  | String                                                                                |                     |
 
 1. If built with the `cover` feature.
 2. By default the statusbar will show a play icon when a track is playing and

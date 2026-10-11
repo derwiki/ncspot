@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add a `client_id` configuration option so the Web API flow (search, playlists,
+  track metadata) can use a personal Spotify app instead of the shared ncspot
+  client ID, which Spotify rate limits per app (HTTP 429, see
+  [hrkfdn/ncspot#1867](https://github.com/hrkfdn/ncspot/issues/1867)). The login
+  and playback flows keep the shared keymaster ID: Spotify's login5 endpoint
+  rejects custom client IDs.
+
+### Changed
+
+- Pin the OAuth redirect URI to `http://127.0.0.1:8989/ncspot_login` (a personal
+  app must register an exact redirect URI) and request only documented OAuth
+  scopes in the login flow, since Spotify rejects the whole authorization
+  request with `invalid_scope` when it does not recognize a scope.
+
 ## [1.5.0]
 
 ### Added
